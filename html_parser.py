@@ -40,11 +40,13 @@ class PTRNS(object):
 
 class ContentTree(object):
     """
-
+    Парсер сайта
     """
     def __init__(self, url):
         """
-
+        url - str, адрес
+        tree - контент сайта в виде дерева
+        data - list, отфильтрованный контент
         """
         self.url = url
         self.tree = None
@@ -60,6 +62,7 @@ class ContentTree(object):
 
     def get_tree_content(self):
         """
+        Фильтрация дерева, исключение ненужного
         """
         tree = self.tree
         data = []
@@ -86,6 +89,7 @@ class ContentTree(object):
 
     def get_full_text(self, element):
         """
+        Текст элемента дерева с текстами всех его детей
         """
         full_text = self.clear(element.text or '')
 
@@ -103,6 +107,7 @@ class ContentTree(object):
 
     def get_tail(self, element):
         """
+        Текст, расположенный после элемента дерева
         """
         if element.tag == A_TAG:
             return "[{0}] {1}".format(element.get("href"), element.tail or '')
@@ -112,13 +117,14 @@ class ContentTree(object):
     @staticmethod
     def clear(text):
         """
+        Избавление от пустоты
         """
         return text.strip('\t\n\r\f\v ')
 
 
 class FileBuilder(object):
     """
-
+    Писарь
     """
     def __init__(self, url):
         """
@@ -127,6 +133,7 @@ class FileBuilder(object):
 
     def get_directory(self):
         """
+        Директория для файла
         """
         pars = urlparse(self.url)
         host = pars.hostname
@@ -139,6 +146,8 @@ class FileBuilder(object):
 
     def write_content(self, data):
         """
+        Пишем в файл!
+        data - list of str, список текстов, который надо записать
         """
         direcoty, filename = self.get_directory()
         if not os.path.exists(direcoty):
@@ -157,12 +166,15 @@ class DataMiner(object):
     """
     def __init__(self, url):
         """
+        tree_builder - отвечает за дерево
+        file_builder - отвечает за файл
         """
         self.tree_builder = ContentTree(url)
         self.file_builder = FileBuilder(url)
 
     def prepare(self):
         """
+        Строим дерево, фильтруем данные
         """
         t_builder = self.tree_builder
         t_builder.build_tree()
@@ -170,6 +182,7 @@ class DataMiner(object):
 
     def mine(self, method=None):
         """
+        Фабрика методов
         """
         if method is None:
             return self.mine_by_df()
@@ -178,6 +191,7 @@ class DataMiner(object):
 
     def mine_by_df(self):
         """
+        Добыча с помощью DataFrame
         """
         df = DataFrame(self.tree_builder.data,
                        columns=['ind', 'tag', 'len', 'dot', 'text', ])
@@ -199,34 +213,21 @@ class DataMiner(object):
             ]
 
             if not main_tag_df.empty:
-
                 edge = self.get_edge(main_tag_df.ind.tolist())
-                # head = 25
-                # edge = 50
-                # print head, edge
-
                 edged_df = df[(df.ind >= head) & (df.ind <= edge)]
-
-                # a= df[(df.ind >= head) & (df.ind <= edge)]
 
                 article = edged_df[
                     (df.tag.isin(HEADERS)) |
                     ((df.tag.isin(CONTENT_TAGS)) & (df['dot']) & (df.len > 0))
                 ]
-
-                # for i, c in a.iterrows():
-                #     print c['ind'], c['len'], c['tag'], c['text']
-
-                data = article['text'].values
-
-                return data
-
+                return article['text'].values
             else:
-                print "OOUCH!!! SH*T HAPPENS"
+                print "OOUCH!!! S**T HAPPENS"
 
     @staticmethod
     def get_edge(indexes):
         """
+        Из списка индексов возвращаем индекс, являющийся концом статьи
         """
         IND = 50
 
@@ -249,6 +250,7 @@ class DataMiner(object):
 
     def get_headers_df(self, df):
         """
+        Индекс заголовка из DataFrame df
         """
         for h_tag in MAIN_HEADERS:
             h_df = df[df.tag == h_tag]
@@ -259,6 +261,7 @@ class DataMiner(object):
 
     def output(self, data):
         """
+        Запись
         """
         self.file_builder.write_content(data)
 
@@ -271,24 +274,3 @@ if __name__ == '__main__':
     miner.prepare()
     data = miner.mine()
     miner.output(data)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

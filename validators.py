@@ -11,6 +11,7 @@ from config import ALLOW_PROTOCOLS
 
 class UrlValidator(object):
     """
+    Проверяет введенный урл
     """
     DEFAULT_PORT = 80
 
@@ -31,6 +32,7 @@ class UrlValidator(object):
 
     def tcp_connect(self):
         """
+        Пытается достучаться до хоста
         """
         try:
             s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -54,6 +56,7 @@ class ArgsValidator(object):
     """
     Валидатор входных параметров
     """
+
     @classmethod
     def validate(cls, args):
         """
