@@ -54,7 +54,7 @@ class ContentTree(object):
         """
         Строим дерево
         """
-        resp = requests.get(self.url)
+        resp = requests.get(self.url, verify=False)
         parser_ = etree.HTMLParser()
         self.tree = etree.parse(StringIO(resp.text), parser_)
 
@@ -91,7 +91,7 @@ class ContentTree(object):
 
         chs = element.getchildren()
         for ch in chs:
-            full_text += self.get_full_text(ch)
+            full_text += ' '+self.get_full_text(ch)
 
         full_text += self.clear(self.get_tail(element))
 
@@ -105,7 +105,7 @@ class ContentTree(object):
         """
         """
         if element.tag == A_TAG:
-            return "[{0}]! {1}".format(element.get("href"), element.tail or '')
+            return "[{0}] {1}".format(element.get("href"), element.tail or '')
 
         return element.tail or ''
 
@@ -130,7 +130,7 @@ class FileBuilder(object):
         """
         pars = urlparse(self.url)
         host = pars.hostname
-        path = pars.path.split('/')
+        path = pars.path.strip('/').split('/')
 
         filename = path[-1].split('.')[0] + '.txt'
         path = filter(None, [ARTICLES_PATH, host, ] + path[:-1])
@@ -187,13 +187,8 @@ class DataMiner(object):
         # заголовка нет
         if head is None:
             pass
-            #     # ищем медиану, она же центр статьи
-            #     content = df[df['tag'].isin(CONTENT_TAGS)]
-            #     biggest = content.sort_values(
-            #         by='len', ascending=False)[:BIG_FOOT]
-            #
-            #     # если статья имеет вес, то медиана правильна
-            #     median = int(biggest['ind'].median())
+            # ищем медиану, она же центр статьи
+            # если статья имеет единственный вес, то медиана правильна
 
         else:
 
