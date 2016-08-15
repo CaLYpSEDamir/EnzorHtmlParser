@@ -207,7 +207,7 @@ class DataMiner(object):
         else:
 
             main_tag_df = df[
-                (df.tag.isin([P_TAG])) &
+                (df.tag.isin(CONTENT_TAGS)) &
                 (df['dot']) &
                 (df.len > MIN_TEXT_LEN)
             ]
